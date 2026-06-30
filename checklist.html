@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist - Personal Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            flex: 1;
+        }
+
+        /* Sidebar Styles */
+        aside {
+            width: 25%;
+            background-color: #34495e;
+            color: white;
+            padding: 0;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            padding: 1.5rem;
+            background-color: #2c3e50;
+            border-bottom: 2px solid #1a252f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .minimize-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: transform 0.3s;
+        }
+
+        .minimize-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* Sidebar Content */
+        .sidebar-content {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        aside ul {
+            list-style: none;
+        }
+
+        aside ul li {
+            padding: 0;
+            transition: all 0.3s;
+            margin: 0.5rem 1rem;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        aside ul li:hover {
+            background-color: #2c3e50;
+            transform: translateX(8px);
+        }
+
+        aside ul li a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        aside ul li a::before {
+            content: attr(data-icon);
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        aside ul li span {
+            display: inline;
+            color: white;
+        }
+
+        /* Minimized State */
+        aside.minimized {
+            width: 80px;
+        }
+
+        aside.minimized .sidebar-header h2 {
+            display: none;
+        }
+
+        aside.minimized .sidebar-header {
+            padding: 1rem;
+            justify-content: center;
+        }
+
+        aside.minimized ul li {
+            margin: 0.75rem auto;
+        }
+
+        aside.minimized ul li:hover {
+            background-color: transparent;
+            transform: none;
+        }
+
+        aside.minimized ul li a {
+            padding: 0.75rem;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        aside.minimized ul li span {
+            display: none;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 1rem;
+            background-color: #2c3e50;
+            border-top: 2px solid #1a252f;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #95a5a6;
+        }
+
+        aside.minimized .sidebar-footer {
+            display: none;
+        }
+
+        /* Main Content Styles */
+        main {
+            flex: 1;
+            padding: 2rem;
+            background-color: white;
+            margin: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 0.75rem 1rem;
+            margin-top: auto;
+            border-top: 2px solid #34495e;
+            font-size: 0.875rem;
+        }
+
+        footer p {
+            margin: 0.25rem 0;
+        }
+
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            display: none;
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Sidebar Hidden State */
+        aside {
+            transition: transform 0.3s ease;
+            width: 25%;
+        }
+
+        aside.hidden {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 999;
+            transform: translateX(-100%);
+        }
+
+        aside.hidden.active {
+            transform: translateX(0);
+        }
+
+        /* Overlay when sidebar is active */
+        body.sidebar-active {
+            overflow: hidden;
+        }
+
+        body.sidebar-active header {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.sidebar-active .container {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.sidebar-active footer {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            aside {
+                width: 100%;
+                padding: 1rem 0;
+                position: static;
+            }
+
+            aside.hidden {
+                position: fixed;
+                width: 100%;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+
+        /* Desktop: Sidebar always visible */
+        @media (min-width: 769px) {
+            aside {
+                position: static;
+                width: 25%;
+            }
+
+            aside.minimized {
+                width: 80px;
+            }
+
+            aside.hidden {
+                position: static;
+                width: 25%;
+                transform: none;
+            }
+
+            .sidebar-toggle {
+                display: none;
+            }
+        }
+    
+        .header-actions {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-btn,
+        .add-task-btn {
+            background-color: #fdcb6e;
+            border: none;
+            color: #2c3e50;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 0.85rem 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.25s ease, transform 0.25s ease;
+        }
+
+        .options-panel {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: white;
+            border: 1px solid #dfe3e8;
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+            padding: 0.85rem;
+            min-width: 200px;
+            display: none;
+            z-index: 20;
+        }
+
+        .options-panel.show {
+            display: block;
+        }
+
+        .options-panel .options-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #617d98;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .options-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.6rem;
+        }
+
+        .options-chip {
+            border: 1px solid #dfe3e8;
+            background: #fff;
+            color: #2c3e50;
+            border-radius: 999px;
+            padding: 0.4rem 0.7rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .options-chip.active {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: #2c3e50;
+        }
+
+        .theme-btn:hover,
+        .add-task-btn:hover {
+            transform: translateY(-1px);
+            background-color: #f7b731;
+        }
+
+        .checklist-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin: 1.5rem 0;
+            justify-content: space-between;
+        }
+
+        .toolbar-left {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .toolbar-left label {
+            font-size: 0.95rem;
+            color: #617d98;
+            flex-shrink: 0;
+        }
+
+        .toolbar-left input {
+            width: 100%;
+            max-width: 420px;
+            padding: 0.95rem 1rem;
+            border-radius: 12px;
+            border: 1px solid #dfe3e8;
+            outline: none;
+            background-color: #ffffff;
+            color: #2c3e50;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            width: 100%;
+            max-width: 260px;
+        }
+
+        .task-list-wrapper {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        #task-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 720px;
+            background-color: transparent;
+        }
+
+        #task-table th,
+        #task-table td {
+            padding: 0.95rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        #task-table th {
+            background-color: #f0f4f8;
+            color: #34495e;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-size: 0.84rem;
+        }
+
+        #task-table td {
+            background-color: #ffffff;
+        }
+
+        #task-table tbody tr:hover td {
+            background-color: #f4f8fb;
+        }
+
+        @media (max-width: 920px) {
+            #task-table {
+                min-width: 100%;
+            }
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.72);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            z-index: 999;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 520px;
+            background-color: #ffffff;
+            border-radius: 22px;
+            padding: 1.75rem 1.5rem;
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #2c3e50;
+        }
+
+        .close-modal {
+            border: none;
+            background: transparent;
+            font-size: 1.45rem;
+            cursor: pointer;
+            color: #2c3e50;
+            padding: 0.15rem;
+            line-height: 1;
+        }
+
+        .modal form label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-size: 0.95rem;
+            color: #2c3e50;
+        }
+
+        .modal form input,
+        .modal form select,
+        .modal form button {
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1rem;
+            padding: 0.95rem 1rem;
+            border: 1px solid #dfe3e8;
+            margin-bottom: 1rem;
+        }
+
+        .modal form input,
+        .modal form select {
+            background: #f8f9fb;
+        }
+
+        .modal form button {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .modal form button:hover {
+            background-color: #1f2f3f;
+        }
+
+        .modal-close-note {
+            color: #6c7a89;
+            font-size: 0.9rem;
+            margin-top: -0.5rem;
+        }
+
+        body.dark-mode .modal-content {
+            background-color: #17202a;
+            color: #e7ebf8;
+        }
+
+        body.dark-mode .modal form input,
+        body.dark-mode .modal form select {
+            background-color: #0f1923;
+            border-color: #22303f;
+            color: #e7ebf8;
+        }
+
+        body.dark-mode .modal form button {
+            background-color: #3f5b87;
+        }
+
+        body.dark-mode .modal {
+            background: rgba(10, 16, 25, 0.82);
+        }
+        
+        .checklist-form {
+            display: none;
+        }
+
+        .task-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .task-actions button {
+            border: none;
+            border-radius: 8px;
+            padding: 0.55rem 0.75rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .mark-done-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .status-completed {
+            color: #27ae60;
+            font-weight: 700;
+        }
+
+        .status-pending {
+            color: #e67e22;
+            font-weight: 700;
+        }
+
+        #no-tasks-message {
+            padding: 1rem 0;
+            color: #6c7a89;
+        }
+
+        body.dark-mode {
+            background-color: #12151d;
+            color: #f2f4f8;
+        }
+
+        body.dark-mode header,
+        body.dark-mode footer,
+        body.dark-mode main,
+        body.dark-mode aside,
+        body.dark-mode .checklist-form,
+        body.dark-mode #task-table th,
+        body.dark-mode #task-table td {
+            background-color: #1b222e;
+            color: #e7ebf8;
+        }
+
+        body.dark-mode header {
+            background-color: #142030;
+        }
+
+        body.dark-mode footer {
+            background-color: #142030;
+            border-top-color: #1f2d3f;
+        }
+
+        body.dark-mode aside {
+            background-color: #17202a;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.35);
+        }
+
+        body.dark-mode .sidebar-header,
+        body.dark-mode .sidebar-footer {
+            background-color: #142030;
+            border-color: #1f2d3f;
+        }
+
+        body.dark-mode .checklist-form {
+            background-color: #15202b;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-mode .checklist-form input,
+        body.dark-mode .checklist-form select,
+        body.dark-mode #search-input {
+            background-color: #0f1923;
+            border-color: #22303f;
+            color: #e7ebf8;
+        }
+
+        body.dark-mode .theme-btn {
+            background-color: #3f5b87;
+            color: #f5f7fb;
+        }
+
+        body.dark-mode .task-actions button {
+            opacity: 0.95;
+        }
+
+        body.dark-mode #task-table th {
+            background-color: #162331;
+        }
+
+        body.dark-mode #task-table td {
+            background-color: #17202a;
+            border-bottom-color: #22303f;
+        }
+
+        body.dark-mode #task-table tbody tr:hover td {
+            background-color: #1d2633;
+        }
+
+        /* Enhanced Viewing Styles */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        main h2 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        main > p {
+            color: #5f6f85;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        /* Enhanced Table Row Styling */
+        #task-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        #task-table tbody tr:hover td {
+            background-color: #f4f8fb;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Enhanced Button Styles */
+        .mark-done-btn,
+        .delete-btn {
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .mark-done-btn:hover {
+            background: #229954 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        .delete-btn:hover {
+            background: #c0392b !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        /* Enhanced Add Task Button */
+        .add-task-btn {
+            transition: all 0.3s ease;
+        }
+
+        .add-task-btn:hover {
+            background-color: #f39c12;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+        }
+
+        /* Enhanced Theme Toggle */
+        .theme-btn {
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(253, 203, 110, 0.3);
+        }
+
+        /* Search Input Enhancement */
+        #search-input {
+            transition: all 0.3s ease;
+        }
+
+        #search-input:focus {
+            border-color: #3498db !important;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            background-color: #ffffff !important;
+        }
+
+        body.dark-mode #search-input:focus {
+            box-shadow: 0 0 0 3px rgba(63, 91, 135, 0.2);
+        }
+
+        /* Modal Animation */
+        .modal-content {
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Status Message Styling */
+        #sync-status {
+            font-weight: 600;
+            animation: fadeInOut 0.3s ease;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Task Summary Styling */
+        #task-summary {
+            transition: color 0.3s ease;
+        }
+
+        /* Content Entrance Animation */
+        main {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Enhanced Footer */
+        footer a {
+            transition: all 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #2980b9;
+        }
+
+        /* Focus Styles for Accessibility */
+        button:focus,
+        input:focus,
+        select:focus,
+        a:focus {
+            outline: 2px solid #3498db;
+            outline-offset: 2px;
+        }
+
+        body.dark-mode button:focus,
+        body.dark-mode input:focus,
+        body.dark-mode select:focus,
+        body.dark-mode a:focus {
+            outline-color: #5b8fc4;
+        }
+
+        /* Enhanced Text Selection */
+        ::selection {
+            background-color: #3498db;
+            color: white;
+        }
+
+        body.dark-mode ::selection {
+            background-color: #5b8fc4;
+            color: #f2f4f8;
+        }
+
+        /* Improved No Tasks Message */
+        #no-tasks-message {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #f8f9fb 100%);
+            border-radius: 8px;
+            font-size: 1.05rem;
+            margin-top: 1rem;
+        }
+
+        body.dark-mode #no-tasks-message {
+            background: linear-gradient(135deg, #162331 0%, #1d2633 100%);
+            color: #a0aec0;
+        }
+
+        /* Enhanced Table Header */
+        #task-table th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Print Styles */
+        @media print {
+            header, footer, aside, .checklist-toolbar {
+                display: none;
+            }
+            main {
+                box-shadow: none;
+                margin: 0;
+            }
+            #task-table {
+                page-break-inside: avoid;
+            }
+            #task-table tbody tr {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Smooth Transitions for Dark Mode */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        main, header, footer, aside {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+            <h1>My Personal Web</h1>
+        </div>
+        <div class="header-actions">
+            <button id="options-btn" class="theme-btn" onclick="toggleOptionsPanel()">⚙️ Options</button>
+            <div id="options-panel" class="options-panel">
+                <div class="options-label">Theme</div>
+                <div class="options-row">
+                    <button type="button" class="options-chip active" data-theme="light">Light</button>
+                    <button type="button" class="options-chip" data-theme="dark">Dark</button>
+                </div>
+                <label class="toggle-row"><input type="checkbox" id="dark-mode-toggle"> Dark mode</label>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="minimized">
+            <div class="sidebar-header">
+                <h2>Navigation</h2>
+                <button class="minimize-btn" onclick="toggleMinimize()">☰</button>
+            </div>
+            <div class="sidebar-content">
+                <ul>
+                    <li><a href="index.html" data-icon="🏠" data-label="Home"><span>Home</span></a></li>
+                    <li><a href="home.html#calendar" data-icon="📅" data-label="Calendar"><span>Calendar</span></a></li>
+                    <li><a href="checklist.html" data-icon="✓" data-label="Checklist"><span>Checklist</span></a></li>
+                    <li><a href="storage.html" data-icon="📦" data-label="Storage"><span>Storage</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <p>&copy; 2026 My Web</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <h2>Checklist</h2>
+            <p>Manage your checklist items here.</p>
+
+            <div class="checklist-toolbar">
+                <div class="toolbar-left">
+                    <label for="search-input">Search Tasks</label>
+                    <input id="search-input" type="search" placeholder="Search tasks by title, category, priority..." aria-label="Search tasks">
+                </div>
+                <div class="toolbar-right">
+                    <button type="button" class="add-task-btn" onclick="toggleModal()">+ Add Task</button>
+                    <span id="task-summary" style="font-weight:600; color:#34495e;"></span>
+                    <span id="sync-status" style="font-size:0.9rem; color:#6c7a89; margin-left:0.5rem;"></span>
+                </div>
+            </div>
+
+            <div class="task-list-wrapper">
+                <div id="no-tasks-message">No tasks yet. Add a task to get started.</div>
+                <table id="task-table">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Due Date</th>
+                            <th>Created</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div id="task-modal" class="modal hidden" onclick="closeModalOnOverlay(event)">
+                <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                    <div class="modal-header">
+                        <h3 id="modal-title">Add Task</h3>
+                        <button type="button" class="close-modal" onclick="toggleModal()" aria-label="Close">&times;</button>
+                    </div>
+                    <form id="task-form">
+                        <label for="task-title">Task</label>
+                        <input id="task-title" type="text" placeholder="Enter task title" required>
+
+                        <label for="task-category">Category</label>
+                        <select id="task-category" required>
+                            <option value="Work">Work</option>
+                            <option value="Personal">Personal</option>
+                            <option value="School">School</option>
+                            <option value="Other">Other</option>
+                        </select>
+
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority" required>
+                            <option value="High">High</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+
+                        <label for="task-due">Due Date & Time</label>
+                        <input id="task-due" type="datetime-local" required>
+
+                        <button type="submit">Save Task</button>
+                        <p class="modal-close-note">Click outside the card or the × button to close.</p>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 My Personal Web. All rights reserved.</p>
+        <p><a href="#top">Back to top</a></p>
+    </footer>
+
+    <script>
+        const storageKey = 'checklistTasks';
+        const themeKey = 'checklistTheme';
+
+        const taskForm = document.getElementById('task-form');
+        const taskTableBody = document.querySelector('#task-table tbody');
+        const noTasksMessage = document.getElementById('no-tasks-message');
+        const searchInput = document.getElementById('search-input');
+        const taskSummary = document.getElementById('task-summary');
+        const optionsPanel = document.getElementById('options-panel');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const syncStatusEl = document.getElementById('sync-status');
+
+        // Apps Script endpoint to add tasks to the Google Sheet
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzx530UV9YLq04z1fI1zWul3i0g3dGXSYV8uLlsFLq5SXUPOn5ilHFNtg9jMNUfaPHZ/exec';
+
+        function showSyncStatus(text, kind = 'info') {
+            syncStatusEl.textContent = text;
+            if (kind === 'success') syncStatusEl.style.color = '#27ae60';
+            else if (kind === 'error') syncStatusEl.style.color = '#e74c3c';
+            else if (kind === 'warning') syncStatusEl.style.color = '#f39c12';
+            else syncStatusEl.style.color = '#6c7a89';
+            clearTimeout(showSyncStatus._timeout);
+            showSyncStatus._timeout = setTimeout(() => {
+                syncStatusEl.textContent = '';
+            }, 4000);
+        }
+
+        function sendToSheet(task) {
+            // Prepare JSON payload expected by your Apps Script doPost
+            const dueParts = (task.due || '').split('T');
+            const dueDate = dueParts[0] || '';
+            const dueTime = dueParts[1] ? dueParts[1].slice(0,5) : '';
+
+            const payload = {
+                name: task.title,
+                category: task.category,
+                priority: task.priority,
+                dueDate: dueDate,
+                dueTime: dueTime
+            };
+
+            fetch(scriptUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).then(res => {
+                if (!res.ok) throw new Error('Network response was not ok');
+                showSyncStatus('Synced', 'success');
+            }).catch(() => {
+                // If POST is blocked by CORS, try a no-cors GET fallback (best-effort, no response available)
+                try {
+                    const q = new URLSearchParams(payload).toString();
+                    fetch(scriptUrl + '?' + q, { mode: 'no-cors' });
+                    showSyncStatus('Sent (no-cors)', 'warning');
+                } catch (err) {
+                    showSyncStatus('Sync failed', 'error');
+                }
+            });
+        }
+
+        async function fetchSheetTasks() {
+            showSyncStatus('Importing...', 'info');
+            try {
+                const res = await fetch(scriptUrl);
+                if (!res.ok) throw new Error('Network response was not ok');
+                const data = await res.json();
+
+                // data is an array of rows (including header). Skip header row if present.
+                const rows = Array.isArray(data) ? data.slice(1) : [];
+                let imported = 0;
+
+                rows.forEach(r => {
+                    // r: [ID, Task, Category, Priority, Due Date, Due Time, Created, Status]
+                    if (!r || r.length < 8) return;
+                    const id = Number(r[0]) || Date.now();
+                    // Skip if already exist by id
+                    if (tasks.some(t => Number(t.id) === id)) return;
+
+                    const dueDate = r[4] ? String(r[4]) : '';
+                    const dueTime = r[5] ? String(r[5]) : '';
+                    const due = dueDate && dueTime ? `${dueDate}T${dueTime}` : (dueDate || r[6] ? new Date(r[6]).toISOString() : '');
+
+                    const createdVal = r[6] ? new Date(r[6]).toISOString() : new Date().toISOString();
+
+                    const importedTask = {
+                        id: id,
+                        title: String(r[1] || ''),
+                        category: String(r[2] || ''),
+                        priority: String(r[3] || 'Medium'),
+                        due: due,
+                        created: createdVal,
+                        completed: String(r[7] || '').toLowerCase() === 'done'
+                    };
+
+                    tasks.push(importedTask);
+                    imported++;
+                });
+
+                if (imported > 0) {
+                    saveTasks();
+                    showSyncStatus(`Imported ${imported}`, 'success');
+                } else {
+                    showSyncStatus('No new rows', 'info');
+                }
+            } catch (err) {
+                showSyncStatus('Import failed (CORS?)', 'error');
+            }
+        }
+
+        let tasks = [];
+
+        function formatDateTime(isoString) {
+            return new Intl.DateTimeFormat('default', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            }).format(new Date(isoString));
+        }
+
+        function saveTasks() {
+            localStorage.setItem(storageKey, JSON.stringify(tasks));
+        }
+
+        function saveTheme(theme) {
+            localStorage.setItem(themeKey, theme);
+        }
+
+        function loadTasks() {
+            const saved = localStorage.getItem(storageKey);
+            tasks = saved ? JSON.parse(saved) : [];
+        }
+
+        function applyTheme(isDark) {
+            document.body.classList.toggle('dark-mode', isDark);
+            darkModeToggle.checked = isDark;
+            document.querySelectorAll('.options-chip').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === (isDark ? 'dark' : 'light'));
+            });
+            saveTheme(isDark ? 'dark' : 'light');
+        }
+
+        function toggleOptionsPanel() {
+            optionsPanel.classList.toggle('show');
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem(themeKey) || 'light';
+            applyTheme(savedTheme === 'dark');
+        }
+
+        function updateSummary(filteredTasks) {
+            const total = filteredTasks.length;
+            const completed = filteredTasks.filter(task => task.completed).length;
+            taskSummary.textContent = `${completed} completed of ${total} tasks`;
+        }
+
+        function renderTasks() {
+            const query = searchInput.value.trim().toLowerCase();
+            const filteredTasks = tasks.filter(task => {
+                const searchable = [task.title, task.category, task.priority].join(' ').toLowerCase();
+                return searchable.includes(query);
+            });
+
+            taskTableBody.innerHTML = '';
+
+            if (filteredTasks.length === 0) {
+                noTasksMessage.style.display = 'block';
+                taskSummary.textContent = 'No tasks match your search yet.';
+                return;
+            }
+
+            noTasksMessage.style.display = 'none';
+
+            filteredTasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.title}</td>
+                    <td>${task.category}</td>
+                    <td>${task.priority}</td>
+                    <td>${formatDateTime(task.due)}</td>
+                    <td>${formatDateTime(task.created)}</td>
+                    <td class="${task.completed ? 'status-completed' : 'status-pending'}">${task.completed ? 'Done' : 'Pending'}</td>
+                    <td>
+                        <div class="task-actions">
+                            <button type="button" class="mark-done-btn">${task.completed ? 'Undo' : 'Mark Done'}</button>
+                            <button type="button" class="delete-btn">Delete</button>
+                        </div>
+                    </td>
+                `;
+
+                const [markDoneBtn, deleteBtn] = row.querySelectorAll('button');
+                markDoneBtn.addEventListener('click', () => toggleTaskCompleted(task.id));
+                deleteBtn.addEventListener('click', () => deleteTask(task.id));
+
+                taskTableBody.appendChild(row);
+            });
+
+            updateSummary(filteredTasks);
+        }
+
+        function addTask(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('task-title').value.trim();
+            const category = document.getElementById('task-category').value;
+            const priority = document.getElementById('task-priority').value;
+            const due = document.getElementById('task-due').value;
+
+            if (!title || !due) return;
+
+            const newTask = {
+                id: Date.now(),
+                title,
+                category,
+                priority,
+                due,
+                created: new Date().toISOString(),
+                completed: false
+            };
+
+            tasks.unshift(newTask);
+            saveTasks();
+            renderTasks();
+            taskForm.reset();
+            toggleModal();
+
+            // Send to Google Sheet via Apps Script
+            try {
+                sendToSheet(newTask);
+            } catch (err) {
+                showSyncStatus('Sync error', 'error');
+            }
+        }
+
+        function toggleModal() {
+            const modal = document.getElementById('task-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('task-title').focus();
+            }
+        }
+
+        function closeModalOnOverlay(event) {
+            if (event.target.id === 'task-modal') {
+                toggleModal();
+            }
+        }
+
+        function toggleTaskCompleted(taskId) {
+            tasks = tasks.map(task => task.id === taskId ? { ...task, completed: !task.completed } : task);
+            saveTasks();
+            renderTasks();
+        }
+
+        function deleteTask(taskId) {
+            tasks = tasks.filter(task => task.id !== taskId);
+            saveTasks();
+            renderTasks();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('aside');
+            const body = document.body;
+            sidebar.classList.toggle('active');
+            body.classList.toggle('sidebar-active');
+        }
+
+        function toggleMinimize() {
+            const sidebar = document.querySelector('aside');
+            sidebar.classList.toggle('minimized');
+        }
+
+        document.querySelectorAll('aside a').forEach(link => {
+            link.addEventListener('click', () => {
+                const sidebar = document.querySelector('aside');
+                const body = document.body;
+                sidebar.classList.remove('active');
+                body.classList.remove('sidebar-active');
+            });
+        });
+
+        document.querySelectorAll('.options-chip').forEach(btn => {
+            btn.addEventListener('click', () => applyTheme(btn.dataset.theme === 'dark'));
+        });
+
+        darkModeToggle.addEventListener('change', event => applyTheme(event.target.checked));
+
+        document.addEventListener('click', function(e) {
+            const sidebar = document.querySelector('aside');
+            const toggleBtn = document.querySelector('.sidebar-toggle');
+            const optionsBtn = document.getElementById('options-btn');
+            if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+                document.body.classList.remove('sidebar-active');
+            }
+            if (!optionsPanel.contains(e.target) && !optionsBtn.contains(e.target)) {
+                optionsPanel.classList.remove('show');
+            }
+        });
+
+        taskForm.addEventListener('submit', addTask);
+        searchInput.addEventListener('input', renderTasks);
+
+        loadTheme();
+        loadTasks();
+        // Try to import existing rows from the Google Sheet, then render local+imported tasks.
+        fetchSheetTasks().finally(() => renderTasks());
+    </script>
+</body>
+</html>

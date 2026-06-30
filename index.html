@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            flex: 1;
+        }
+
+        /* Sidebar Styles */
+        aside {
+            width: 25%;
+            background-color: #34495e;
+            color: white;
+            padding: 0;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            padding: 1.5rem;
+            background-color: #2c3e50;
+            border-bottom: 2px solid #1a252f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .minimize-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: transform 0.3s;
+        }
+
+        .minimize-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* Sidebar Content */
+        .sidebar-content {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        aside ul {
+            list-style: none;
+        }
+
+        aside ul li {
+            padding: 0;
+            transition: all 0.3s;
+            margin: 0.5rem 1rem;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        aside ul li:hover {
+            background-color: #2c3e50;
+            transform: translateX(8px);
+        }
+
+        aside ul li a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        aside ul li a::before {
+            content: attr(data-icon);
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        aside ul li span {
+            display: inline;
+            color: white;
+        }
+
+        /* Minimized State */
+        aside.minimized {
+            width: 80px;
+        }
+
+        aside.minimized .sidebar-header h2 {
+            display: none;
+        }
+
+        aside.minimized .sidebar-header {
+            padding: 1rem;
+            justify-content: center;
+        }
+
+        aside.minimized ul li {
+            margin: 0.75rem auto;
+        }
+
+        aside.minimized ul li:hover {
+            background-color: transparent;
+            transform: none;
+        }
+
+        aside.minimized ul li a {
+            padding: 0.75rem;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        aside.minimized ul li span {
+            display: none;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 1rem;
+            background-color: #2c3e50;
+            border-top: 2px solid #1a252f;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #95a5a6;
+        }
+
+        aside.minimized .sidebar-footer {
+            display: none;
+        }
+
+        /* Main Content Styles */
+        main {
+            flex: 1;
+            padding: 2rem;
+            background-color: white;
+            margin: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 0.75rem 1rem;
+            margin-top: auto;
+            border-top: 2px solid #34495e;
+            font-size: 0.875rem;
+        }
+
+        footer p {
+            margin: 0.25rem 0;
+        }
+
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            display: none;
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Sidebar Hidden State */
+        aside {
+            transition: transform 0.3s ease;
+            width: 25%;
+        }
+
+        aside.hidden {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 999;
+            transform: translateX(-100%);
+        }
+
+        aside.hidden.active {
+            transform: translateX(0);
+        }
+
+        /* Overlay when sidebar is active */
+        body.sidebar-active {
+            overflow: hidden;
+        }
+
+        body.sidebar-active header {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.sidebar-active .container {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.sidebar-active footer {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            aside {
+                width: 100%;
+                padding: 1rem 0;
+                position: static;
+            }
+
+            aside.hidden {
+                position: fixed;
+                width: 100%;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            header nav a {
+                margin-left: 1rem;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+
+        /* Desktop: Sidebar always visible */
+        @media (min-width: 769px) {
+            aside {
+                position: static;
+                width: 25%;
+            }
+
+            aside.minimized {
+                width: 80px;
+            }
+
+            aside.hidden {
+                position: static;
+                width: 25%;
+                transform: none;
+            }
+
+            .sidebar-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+            <h1>My Personal Web</h1>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="minimized">
+            <div class="sidebar-header">
+                <h2>Navigation</h2>
+                <button class="minimize-btn" onclick="toggleMinimize()">☰</button>
+            </div>
+            <div class="sidebar-content">
+                <ul>
+                    <li><a href="index.html" data-icon="🏠" data-label="Home"><span>Home</span></a></li>
+                    <li><a href="home.html#calendar" data-icon="📅" data-label="Calendar"><span>Calendar</span></a></li>
+                    <li><a href="checklist.html" data-icon="✓" data-label="Checklist"><span>Checklist</span></a></li>
+                    <li><a href="storage.html" data-icon="📦" data-label="Storage"><span>Storage</span></a></li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <p>&copy; 2026 My Web</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <h2>Welcome</h2>
+            <p>This is your personal web application with a header, sidebar, and footer.</p>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 My Personal Web. All rights reserved.</p>
+        <p><a href="#top">Back to top</a></p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('aside');
+            const body = document.body;
+            sidebar.classList.toggle('active');
+            body.classList.toggle('sidebar-active');
+        }
+
+        function toggleMinimize() {
+            const sidebar = document.querySelector('aside');
+            sidebar.classList.toggle('minimized');
+        }
+
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('aside a').forEach(link => {
+            link.addEventListener('click', () => {
+                const sidebar = document.querySelector('aside');
+                const body = document.body;
+                sidebar.classList.remove('active');
+                body.classList.remove('sidebar-active');
+            });
+        });
+
+        // Close sidebar when clicking anywhere outside it
+        document.addEventListener('click', function(e) {
+            const sidebar = document.querySelector('aside');
+            const toggleBtn = document.querySelector('.sidebar-toggle');
+            
+            // Don't close if clicking on sidebar, toggle button, or links
+            if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+                document.body.classList.remove('sidebar-active');
+            }
+        });
+    </script>
+</body>
+</html>
